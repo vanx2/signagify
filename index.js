@@ -19,7 +19,7 @@ detector.on('detect', function(cast){
   client.on('status', function(status){
     console.log('[CLIENT STATUS] ' + cast.name, 
       (status.hasOwnProperty('applications') && status.applications[0].hasOwnProperty('displayName') ) ? 
-       status.applications[0]displayName : status;
+       status.applications[0].displayName : status);
   });
   client.connect(cast.ip, function() {
 /*

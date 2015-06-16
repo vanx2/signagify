@@ -1,0 +1,25 @@
+{
+  "name": "signageful",
+  "version": "1.0.0",
+  "description": "make all chromecasts in a same local NW to playback a video",
+  "main": "index.js",
+  "dependencies": {
+    "castv2-client": "^1.1.0",
+    "multicast-dns": "^2.1.1",
+    "node-static": "^0.7.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vanx2/signageify"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vanx2/signageify/issues"
+  },
+  "homepage": "https://github.com/vanx2/signageify"
+}
