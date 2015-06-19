@@ -10,61 +10,62 @@ var Client                = require('castv2-client').Client;
 var CustomReciever = require('./lib/customReciever.js');
 
 // detect chromecast address in my network via multicast DNS
-detector.on('detect', function(cast){
+detector.on('detect', function (cast){
   if ( cast.name.substr(0,4) != 'vanx' ){ return; }
-  console.log('[KICK] ' + cast.name);
+//  if ( cast.name.substr(0,8) != 'signage@' ){ return; }
+  console.log('[KICK] ', new Date().toLogFormat(), cast.name );
 
   var client = new Client();
   client.on('error', remove);
   client.on('status', function(status){
-    console.log('[CLIENT STATUS] ' + cast.name, 
+    console.log('[CLIENT STATUS]', new Date().toLogFormat(), cast.name, 
       (status.hasOwnProperty('applications') && status.applications[0].hasOwnProperty('displayName') ) ? 
        status.applications[0].displayName : status);
   });
   client.connect(cast.ip, function() {
-/*
-    client.getSessions(function(){
-      console.log('getSessions');
-    });
-*/
     client.launch(CustomReciever, function(err, player) {
       player.on('status', function(status) {
-        console.log('[PLAYER STATUS] ', (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
+        console.log('[PLAYER STATUS]', new Date().toLogFormat(), cast.name,
+          (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
       });
       player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true }, function(err, status) {
         if(err){ remove(err); }
-        client.playTimer = setInterval(function() {
-          player.getStatus(function(err, status){
-            if(err){ remove(err); }
-            if ( status.playerState != 'PLAYING' && status.playerState != 'BUFFERING' ) {
-              console.log('player was ' + status.playerState );
-              player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true },function (){}); // todo
-            }
-          });
-        }, 3000);
         client.clientTimer = setInterval(function() {
           client.getStatus(function(err, status){
             if(err) {
               remove(err);
             } else if (status.hasOwnProperty('applications') && status.applications[0].appId === 'E8C28D3C'){
-              remove(status.applications[0].appId + ' was running');
+              remove('dropped'); 
+            } else if (status.hasOwnProperty('applications') && status.applications[0].appId == CustomReciever.APP_ID ) {
+              player.getStatus(function(err, status){
+                if(err){ remove(err); }
+                if ( status.playerState != 'PLAYING' && status.playerState != 'BUFFERING' ) {
+                  console.log('[RELOAD] ', new Date().toLogFormat(), cast.name, status.playerState );
+                  if(client.clientTimer){clearInterval(client.clientTimer);}
+                  player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true },function (){}); // todo
+                }
+              });
             }
           });
-        }, 3000);
+        }, 10000);
       });
     });
   });
 
   function remove(err) {
-    console.log('[ERROR] ' + cast.name + ' ' + cast.ip);
-    console.log(err);
-    if(client.playTimer){clearInterval(client.playTimer);}
+    console.log('[ERROR]', new Date().toLogFormat(), cast.name, err);
     if(client.clientTimer){clearInterval(client.clientTimer);}
-    client.close();
-//    delete detector.casts[cast.name];   // todo
+    try { client.close(); } catch (err) {console.log(err);}
+    try { delete client;} catch (err) {console.log(err);}
     detector.emit('detect', cast);
+//    delete detector.casts[cast.name];   // todo
   }
 });
+
+Date.prototype.toLogFormat = function() {
+  return this.toISOString().split('T')[0] + ' ' +  this.toLocaleTimeString();
+};
+
 detector.listen('daemon');
 
 

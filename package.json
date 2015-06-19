@@ -1,5 +1,5 @@
 {
-  "name": "signageful",
+  "name": "signageify",
   "version": "1.0.0",
   "description": "make all chromecasts in a same local NW to playback a video",
   "main": "index.js",
