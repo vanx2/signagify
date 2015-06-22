@@ -1,12 +1,7 @@
 #!/bin/env node
 
-// web server for reciever.html and video
-var contentsServer = require('./lib/contentsServer.js');
-contentsServer.start(8080, './pub');
-
 var detector = require('./lib/chromecastDetector.js');
 var Client                = require('castv2-client').Client;
-//var DefaultMediaReceiver  = require('castv2-client').DefaultMediaReceiver;
 var CustomReciever = require('./lib/customReciever.js');
 
 // detect chromecast address in my network via multicast DNS
