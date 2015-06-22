@@ -18,40 +18,42 @@ detector.on('detect', function (cast){
   var client = new Client();
   client.on('error', remove);
   client.on('status', function(status){
-    console.log('[CLIENT STATUS]', new Date().toLogFormat(), cast.name, 
-      (status.hasOwnProperty('applications') && status.applications[0].hasOwnProperty('displayName') ) ? 
+    console.log('[CLIENT STATUS]', new Date().toLogFormat(), cast.name,
+      (status.hasOwnProperty('applications') && status.applications[0].hasOwnProperty('displayName') ) ?
        status.applications[0].displayName : status);
   });
   client.connect(cast.ip, function() {
     client.launch(CustomReciever, function(err, player) {
-      player.on('status', function(status) {
-        console.log('[PLAYER STATUS]', new Date().toLogFormat(), cast.name,
-          (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
-      });
-      player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true }, function(err, status) {
-        if(err){ remove(err); }
-        client.clientTimer = setInterval(function() {
-          client.getStatus(function(err, status){
-            if(err) {
-              remove(err);
-            } else if (status.hasOwnProperty('applications') && status.applications[0].appId === 'E8C28D3C'){
-              remove('dropped'); 
-            } else if (status.hasOwnProperty('applications') && status.applications[0].appId == CustomReciever.APP_ID ) {
-              player.getStatus(function(err, status){
-                if(err){ remove(err); }
-                if ( status.playerState != 'PLAYING' && status.playerState != 'BUFFERING' ) {
-                  console.log('[RELOAD] ', new Date().toLogFormat(), cast.name, status.playerState );
-                  if(client.clientTimer){clearInterval(client.clientTimer);}
-                  player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true },function (){}); // todo
+      if(err){ remove(err); } else {
+        player.on('status', function(status) {
+          console.log('[PLAYER STATUS]', new Date().toLogFormat(), cast.name,
+            (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
+        });
+        player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true }, function(err, status) {
+          if(err){ remove(err); } else {
+            client.clientTimer = setInterval(function() {
+              client.getStatus(function(err, status){
+                if(err) {
+                  remove(err);
+                } else if (status.hasOwnProperty('applications') && status.applications[0].appId === 'E8C28D3C'){
+                  remove('dropped'); 
+                } else if (status.hasOwnProperty('applications') && status.applications[0].appId == CustomReciever.APP_ID ) {
+                  player.getStatus(function(err, status){
+                    if(err){ remove(err);
+                    } else if ( status.playerState != 'PLAYING' && status.playerState != 'BUFFERING' ) {
+                      console.log('[RELOAD] ', new Date().toLogFormat(), cast.name, status.playerState );
+//                      if(client.clientTimer){clearInterval(client.clientTimer);}
+                      player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true },function (){}); // todo
+                    }
+                  });
                 }
               });
-            }
-          });
-        }, 10000);
-      });
+            }, 10000);
+          }
+        });
+      }
     });
   });
-
   function remove(err) {
     console.log('[ERROR]', new Date().toLogFormat(), cast.name, err);
     if(client.clientTimer){clearInterval(client.clientTimer);}
