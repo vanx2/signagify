@@ -35,7 +35,8 @@ detector.on('detect', function (cast){
                 } else if (status.hasOwnProperty('applications') && status.applications[0].appId == CustomReciever.APP_ID ) {
                   player.getStatus(function(err, status){
                     if(err){ remove(err);
-                    } else if ( status.playerState != 'PLAYING' && status.playerState != 'BUFFERING' ) {
+                    } else if ( status.hasOwnProperty('playerState') && 
+                                status.playerState != 'PLAYING' && status.playerState != 'BUFFERING' ) {
                       console.log('[RELOAD] ', new Date().toLogFormat(), cast.name, status.playerState );
 //                      if(client.clientTimer){clearInterval(client.clientTimer);}
                       player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true },function (){}); // todo
