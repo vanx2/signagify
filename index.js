@@ -6,7 +6,7 @@ var CustomReciever = require('./lib/customReciever.js');
 
 // detect chromecast address in my network via multicast DNS
 detector.on('detect', function (cast){
-  if ( cast.name.substr(0,4) != 'vanx' ){ return; }
+//  if ( cast.name.substr(0,4) != 'vanx' ){ return; }
 //  if ( cast.name.substr(0,8) != 'signage@' ){ return; }
   console.log('[KICK] ', new Date().toLogFormat(), cast.name );
 
@@ -53,10 +53,10 @@ detector.on('detect', function (cast){
   function remove(err) {
     console.log('[ERROR]', new Date().toLogFormat(), cast.name, err);
     if(client.clientTimer){clearInterval(client.clientTimer);}
-    try { client.close(); } catch (err) {console.log(err);}
+    try { if(client.receiver){ client.close();} } catch (err) {console.log(err);}
     try { delete client;} catch (err) {console.log(err);}
-    detector.emit('detect', cast);
-//    delete detector.casts[cast.name];   // todo
+//    detector.emit('detect', cast);
+    delete detector.casts[cast.name];   // todo
   }
 });
 
