@@ -6,7 +6,7 @@ var detector = require('chromecast-detector');
 
 detector.on('detect', function (cast){
 //  if ( cast.name.substr(0,4) != 'vanx' ){ return; }
-//  if ( cast.name.substr(0,8) != 'signage@' ){ return; }
+  if ( cast.name.substr(0,8) != 'signage@' ){ return; }
   var client = new Client();
   client.on('error', function(err){console.log(err)});
   client.on('status', function(cstatus){
@@ -42,13 +42,13 @@ detector.on('detect', function (cast){
                 });
                 player.getStatus(function(err, pstatus){
 console.log(pstatus);
-                  if( err ) { detach(err);}
-                  else if ( pstatus && pstatus.hasOwnProperty('playerState') && 
+                  if( err ) { detach(err);} else
+                  if ( pstatus && pstatus.hasOwnProperty('playerState') && 
                        pstatus.playerState != 'PLAYING' && pstatus.playerState !='BUFFERING'){
                     player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true }, function(err, ppstatus) {
 console.log(ppstatus);
                       if ( err ) { detach(err); } else
-                      if ( ppstatus.hasOwnProperty('playerState') && 
+                      if ( ppstatus && ppstatus.hasOwnProperty('playerState') && 
                            ppstatus.playerState != 'PLAYING' && ppstatus.playerState !='BUFFERING') {
                         detach('status is ' + ppstatus.playerState);
                       }
