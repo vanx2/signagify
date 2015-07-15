@@ -27,7 +27,7 @@ console.log('[launch]',new Date().toLogFormat(), cast.name);
           console.log('[PLAYER STATUS]', new Date().toLogFormat(), cast.name,
             (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
         });
-        client.player.load({contentId: 'http://192.168.1.171:8080/x.mp4'}, { autoplay: true }, 
+        client.player.load({contentId: 'http://192.168.1.171/x.mp4'}, { autoplay: true }, 
           function(err, status) {
             if(err){ remove(err); } else {
               client.timer = setTimeout(monitor,3*1000);
@@ -62,7 +62,7 @@ console.log('join', new Date().toLogFormat(), cast.name);
         }
       } else {
 console.log('client has no status', new Date().toLogFormat(), cast.name);
-        client.timer = setTimeout(monitor,3*1000);
+        client.timer = setTimeout(monitor,5*1000);
       }
     });
   }
