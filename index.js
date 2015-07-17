@@ -18,25 +18,6 @@ detector.on('detect', function (cast){
        status.applications[0].displayName : status);
   });
   client.connect(cast.ip, monitor);
-  function launch(){
-console.log('[launch]',new Date().toLogFormat(), cast.name);
-    client.launch(CustomReciever, function(err, player) {
-      if(err){ remove(err); } else {
-        client.player = player;
-        client.player.on('status', function(status) {
-          console.log('[PLAYER STATUS]', new Date().toLogFormat(), cast.name,
-            (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
-        });
-        client.player.load({contentId: 'http://192.168.1.171/x.mp4'}, { autoplay: true }, 
-          function(err, status) {
-            if(err){ remove(err); } else {
-              client.timer = setTimeout(monitor,3*1000);
-            }
-          }
-        );
-      }
-    });
-  }
   function monitor(){
 console.log('watch', new Date().toLogFormat(), cast.name);
     client.getStatus(function(err, status){
@@ -58,11 +39,11 @@ console.log('join', new Date().toLogFormat(), cast.name);
           }
         } else {
           console.log('[IGNORE APP]', new Date().toLogFormat(), cast.name, status);
-          client.timer = setTimeout(monitor,3*1000);
+          client.timer = setTimeout(monitor,5*1000);
         }
       } else {
 console.log('client has no status', new Date().toLogFormat(), cast.name);
-        client.timer = setTimeout(monitor,5*1000);
+        launch();
       }
     });
   }
@@ -75,11 +56,30 @@ console.log('client has no status', new Date().toLogFormat(), cast.name);
           launch();
         } else {
           console.log('[PLAYER STATUS]', new Date().toLogFormat(), cast.name, status.playerState); 
-          client.timer = setTimeout(monitor,3*1000);
+          client.timer = setTimeout(monitor,5*1000);
         }
       } else {
 console.log('player has no status', new Date().toLogFormat(), cast.name);
-        client.timer = setTimeout(monitor,3*1000);
+        launch();
+      }
+    });
+  }
+  function launch(){
+console.log('[launch]',new Date().toLogFormat(), cast.name);
+    client.launch(CustomReciever, function(err, player) {
+      if(err){ remove(err); } else {
+        client.player = player;
+        client.player.on('status', function(status) {
+          console.log('[PLAYER STATUS]', new Date().toLogFormat(), cast.name,
+            (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
+        });
+        client.player.load({contentId: 'http://192.168.1.171/x.mp4'}, { autoplay: true }, 
+          function(err, status) {
+            if(err){ remove(err); } else {
+              client.timer = setTimeout(monitor,5*1000);
+            }
+          }
+        );
       }
     });
   }
@@ -88,7 +88,7 @@ console.log('player has no status', new Date().toLogFormat(), cast.name);
     if(client.timer){clearTimeout(client.timer);}
     if(client.receiver){ client.close();}
     delete client;
-    delete detector.casts[cast.name];   // todo
+    delete detector.casts[cast.id];   // todo
   }
 });
 
