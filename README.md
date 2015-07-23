@@ -1,2 +1,2 @@
 # signageify
-keep all chromecast in local NW playback a same video as signage
+keep all chromecasts in local NW playbacking a same video as a signage
