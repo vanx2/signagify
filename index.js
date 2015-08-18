@@ -22,7 +22,7 @@ detector.on('detect', function (cast){
   function monitor(){
 console.log('watch', new Date().toLog(), cast.name);
     client.getStatus(function (err, status){
-      if (err) {remove(err);}
+      if (err) {remove(err);} else 
       if (status && status.hasOwnProperty('applications')){
         if (status.applications[0].appId === 'E8C28D3C'){
           console.log('backdrop!');
@@ -39,10 +39,10 @@ console.log('join', new Date().toLog(), cast.name);
             playerMonitor();
           }
         } else if (status.applications[0].appId == '0F5096E8'){
-          console.log('[GUEST USE]', new Date().toLog(), cast.name, status); 
+          console.log('  [GUEST USE]', new Date().toLog(), cast.name, status); 
           client.timer = setTimeout(monitor,5*1000);
         } else {
-          console.log('[IGNORE APP]', new Date().toLog(), cast.name, status);
+          console.log('  [IGNORE APP]', new Date().toLog(), cast.name, status);
           client.timer = setTimeout(monitor,5*1000);
         }
       } else {
@@ -60,11 +60,11 @@ console.log('client has no status', new Date().toLog(), cast.name);
           console.log('[RELOAD] ', new Date().toLog(), cast.name, status.playerState );
           launch();
         } else {
-          console.log('[PLAYER STATUS]', new Date().toLog(), cast.name, status.playerState); 
+          console.log('  [PLAYER STATUS]', new Date().toLog(), cast.name, status.playerState); 
           client.timer = setTimeout(monitor,5*1000);
         }
       } else {
-console.log('player has no status', new Date().toLog(), cast.name);
+console.log('player has no status', new Date().toLog(), cast.name, status);
         launch();
       }
     });
@@ -76,7 +76,7 @@ console.log('[launch]',new Date().toLog(), cast.name);
       if(err){ remove(err); } else {
         client.player = player;
         client.player.on('status', function(status) {
-          console.log('[PLAYER STATUS]', new Date().toLog(), cast.name,
+          console.log('  [PLAYER STATUS]', new Date().toLog(), cast.name,
             (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
         });
         client.player.load({contentId: 'http://192.168.1.171/x.mp4'}, { autoplay: true }, 
