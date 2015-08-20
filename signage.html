@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+<style type="text/css">
+  body { background-color: black; margin: 0px; border: 0px; overflow: hidden }
+    #vid { position: fixed; width: 100%; height: 100%; display: none }
+    #iid { position: fixed; width: 100%; height: 100%; display: none;
+           background-size: contain; background-repeat: no-repeat; background-position: center; }
+    #tid { position: fixed; width: 100%; height: 100%; color: white; font-size: 120px }
+</style>
+<script type="text/javascript"
+    src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js">
+</script>
+    <title>SIGNAGE</title>
+  </head>
+  <body>
+  <video id='vid' src="http://localhost/a.mp4"></video>
+  <!-- video id='vid' src="http://192.168.1.171/x.mp4"></video -->
+  <div id='iid'></div>
+  <marquee id='tid' scrollamount=30 >今日も、新幹線をご利用くださいましてありがとうございます。この電車は、のぞみ号博多行きです。途中の停車駅は、品川、新横浜、名古屋、京都、新大阪、新神戸、姫路、岡­山、広島、小倉です。この電車は、全席、禁煙となっております。お煙草を吸われるお客様は、喫煙ルームをご利用ください。</marquee>
+<script type="text/javascript">
+  var vid = document.getElementById('vid');
+  var img = document.getElementById('iid');
+  var txt = document.getElementById('tid');
+/*
+  window.onload = function() {
+    cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
+    window.mediaElement = vid;
+    window.mediaManager = new cast.receiver.MediaManager(window.mediaElement);
+    window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+    castReceiverManager.onSenderDisconnected = function (event) {
+      console.log("sender disconnected");
+    };
+    castReceiverManager.start();
+  };
+*/
+  var watchTimer;
+  var currentTime;
+  var imgQueue = [];
+  function sendImageReq(){
+    var jsonp = document.createElement('script');
+    jsonp.src = 'http://localhost:9000/?callback=getImage';
+    document.head.appendChild(jsonp);
+    document.head.removeChild(jsonp);
+/*
+    var req = new XMLHttpRequest();
+    req.open("GET", "http://localhost:9000/", false);
+    req.send();
+    
+    JSON.parse(req.responseText).forEach(function(value, index, all){
+      console.log();
+    });
+*/
+  }
+  function getImage(files){
+    imgQueue = files;
+    imageWorker();
+  }
+  function imageWorker(){
+    if ( imgQueue.length > 0 ) {
+      img.style.display = "block";
+      img.style.backgroundImage = 'url(img/' + imgQueue.shift() + ')';
+      setTimeout(imageWorker, 10*1000);
+    } else {
+      if (! vid.error){
+        img.style.display = "none";
+        vid.style.display = "block";
+        vid.play();
+        watchTimer = setInterval(watchDog, 10*1000);
+      } else {
+//        vid.load();
+        sendImageReq();
+      }
+    }
+  }
+  vid.addEventListener("ended", function(){
+    clearInterval(watchTimer);
+    vid.style.display = "none";
+    sendImageReq();
+//    vid.load();
+  });
+  function watchDog(){
+    if (! vid.ended) {
+      if (vid.error){
+        console.log('ERROR ', vid.error);
+        vid.load();
+        vid.play();
+      }
+      if(currentTime == vid.currentTime){
+        vid.load();
+        vid.play();
+      }
+      currentTime = vid.currentTime;
+    }
+  }
+  sendImageReq();
+
+  
+</script>
+  </body>
+</html>
+
