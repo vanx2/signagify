@@ -6,15 +6,13 @@ var CustomReciever = require('./lib/customReciever.js');
 
 // detect chromecast address in my network via multicast DNS
 detector.on('detect', function (cast){
-  if ( cast.name.substr(0,8) != 'vanx' ){ return; }
-//  if ( cast.name.substr(0,8) != 'signage@' ){ return; }
-  console.log('[KICK] ', new Date().toLog(), cast.name );
-
+  if ( cast.name.substr(0,8) != 'signage@' ){ return; }
   var client = new Client();
   client.on('error', remove);
   client.on('status', function (status){
     console.log('[CLIENT STATUS]', new Date().toLog(), cast.name,
-      (status.hasOwnProperty('applications') && status.applications[0].hasOwnProperty('displayName') ) ?
+      (status.hasOwnProperty('applications') && 
+       status.applications[0].hasOwnProperty('displayName') ) ?
        status.applications[0].displayName : status);
   });
   client.connect(cast.ip, monitor);
@@ -31,9 +29,10 @@ console.log('watch', new Date().toLog(), cast.name);
           if (! client.player){
 console.log('join', new Date().toLog(), cast.name);
             client.join(status.applications[0], CustomReciever, function (err, player) {
-              if (err){ remove(err);}
-              client.player = player;
-              playerMonitor();
+              if (err){ remove(err);} else {
+                client.player = player;
+                playerMonitor();
+              }
             });
           } else {
             playerMonitor();
@@ -54,7 +53,7 @@ console.log('client has no status', new Date().toLog(), cast.name);
 
   function playerMonitor(){
     client.player.getStatus(function(err, status){
-      if(err){ remove(err);}
+      if(err){ remove(err);} else
       if ( status && status.hasOwnProperty('playerState')) { 
         if (status.playerState != 'PLAYING' && status.playerState != 'BUFFERING' ) {
           console.log('[RELOAD] ', new Date().toLog(), cast.name, status.playerState );

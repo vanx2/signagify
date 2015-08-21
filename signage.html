@@ -14,10 +14,9 @@
     <title>SIGNAGE</title>
   </head>
   <body>
-  <video id='vid' src="http://localhost/a.mp4"></video>
-  <!-- video id='vid' src="http://192.168.1.171/x.mp4"></video -->
+  <video id='vid'></video>
   <div id='iid'></div>
-  <marquee id='tid' scrollamount=30 >今日も、新幹線をご利用くださいましてありがとうございます。この電車は、のぞみ号博多行きです。途中の停車駅は、品川、新横浜、名古屋、京都、新大阪、新神戸、姫路、岡­山、広島、小倉です。この電車は、全席、禁煙となっております。お煙草を吸われるお客様は、喫煙ルームをご利用ください。</marquee>
+  <marquee id='tid' scrollamount=20 ></marquee>
 <script type="text/javascript">
   var vid = document.getElementById('vid');
   var img = document.getElementById('iid');
@@ -36,48 +35,55 @@
 */
   var watchTimer;
   var currentTime;
-  var imgQueue = [];
-  function sendImageReq(){
+  var mediaQueue = [];
+  function sendReq(){
     var jsonp = document.createElement('script');
-    jsonp.src = 'http://localhost:9000/?callback=getImage';
+    jsonp.src = 'http://localhost:9000/?callback=getList';
     document.head.appendChild(jsonp);
+// todo: if error
     document.head.removeChild(jsonp);
-/*
-    var req = new XMLHttpRequest();
-    req.open("GET", "http://localhost:9000/", false);
-    req.send();
-    
-    JSON.parse(req.responseText).forEach(function(value, index, all){
-      console.log();
+  }
+  function getList(files){
+    files.forEach(function (file) {
+      tid.innerHTML = '';
+      if ( /\.txt$/.test(file) ) {
+        tid.innerHTML = tid.innerHTML + '      ' + 
+                        file.substr(0, file.length - 4);
+      }
     });
-*/
+    mediaQueue = files;
+    mediaWorker();
   }
-  function getImage(files){
-    imgQueue = files;
-    imageWorker();
-  }
-  function imageWorker(){
-    if ( imgQueue.length > 0 ) {
-      img.style.display = "block";
-      img.style.backgroundImage = 'url(img/' + imgQueue.shift() + ')';
-      setTimeout(imageWorker, 10*1000);
-    } else {
-      if (! vid.error){
+  function mediaWorker(){
+    if ( mediaQueue.length > 0 ) {
+      var media = mediaQueue.shift();
+      if (/\.(png|gif|jpe?g)$/.test(media)){
+        img.style.display = "block";
+        img.style.backgroundImage = 'url(img/' + media + ')';
+        var showSec = 10;
+        var arr = media.split(/\./);
+        if ( (arr[arr.length - 2]).match(/^[0-9]+$/) ) {
+          showSec = 0 + arr[media.arr.length - 2];
+        }
+        setTimeout(mediaWorker, showSec*1000);
+      } else if (/\.mp4$/.test(media)) {
+        vid.src = media;
         img.style.display = "none";
         vid.style.display = "block";
         vid.play();
+// todo: if error
         watchTimer = setInterval(watchDog, 10*1000);
       } else {
-//        vid.load();
-        sendImageReq();
+        mediaWorker();
       }
+    } else {
+     sendReq();
     }
   }
   vid.addEventListener("ended", function(){
     clearInterval(watchTimer);
     vid.style.display = "none";
-    sendImageReq();
-//    vid.load();
+    mediaWorker();
   });
   function watchDog(){
     if (! vid.ended) {
@@ -93,9 +99,7 @@
       currentTime = vid.currentTime;
     }
   }
-  sendImageReq();
-
-  
+  sendReq();
 </script>
   </body>
 </html>
