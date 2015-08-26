@@ -7,7 +7,6 @@ var CustomReciever = require('./lib/customReciever.js');
 // detect chromecast address in my network via multicast DNS
 detector.on('detect', function (cast){
   if ( cast.name.substr(0,8) != 'signage@' ){ return; }
-//  if ( cast.name.substr(0,4) != 'vanx' ){ return; }
   var client = new Client();
   client.on('error', remove);
   client.on('status', function (status){
