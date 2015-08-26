@@ -16,12 +16,13 @@
   <body>
   <video id='vid'></video>
   <div id='iid'></div>
-  <marquee id='tid' scrollamount=20 ></marquee>
+  <marquee id='tid' scrollamount=20 >a</marquee>
 <script type="text/javascript">
   var vid = document.getElementById('vid');
   var img = document.getElementById('iid');
   var txt = document.getElementById('tid');
-/*
+  var host = 'http://192.168.1.171';
+
   window.onload = function() {
     cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
     window.mediaElement = vid;
@@ -32,13 +33,13 @@
     };
     castReceiverManager.start();
   };
-*/
+
   var watchTimer;
   var currentTime;
   var mediaQueue = [];
   function sendReq(){
     var jsonp = document.createElement('script');
-    jsonp.src = 'http://localhost:9000/?callback=getList';
+    jsonp.src = host + ':9000/?callback=getList';
     document.head.appendChild(jsonp);
 // todo: if error
     document.head.removeChild(jsonp);
@@ -47,7 +48,7 @@
     files.forEach(function (file) {
       tid.innerHTML = '';
       if ( /\.txt$/.test(file) ) {
-        tid.innerHTML = tid.innerHTML + '      ' + 
+        tid.innerHTML = tid.innerHTML + '      ' +
                         file.substr(0, file.length - 4);
       }
     });
@@ -57,19 +58,21 @@
   function mediaWorker(){
     if ( mediaQueue.length > 0 ) {
       var media = mediaQueue.shift();
+tid.innerHTML = media;
       if (/\.(png|gif|jpe?g)$/.test(media)){
         img.style.display = "block";
-        img.style.backgroundImage = 'url(img/' + media + ')';
-        var showSec = 10;
+        img.style.backgroundImage = 'url(' + host + '/img/' + media + ')';
+        var showSec = 1;
         var arr = media.split(/\./);
         if ( (arr[arr.length - 2]).match(/^[0-9]+$/) ) {
           showSec = 0 + arr[media.arr.length - 2];
         }
         setTimeout(mediaWorker, showSec*1000);
       } else if (/\.mp4$/.test(media)) {
-        vid.src = media;
+        vid.src = 'https://192.168.1.171/' + media;
         img.style.display = "none";
         vid.style.display = "block";
+        vid.load();
         vid.play();
 // todo: if error
         watchTimer = setInterval(watchDog, 10*1000);
@@ -80,6 +83,9 @@
      sendReq();
     }
   }
+  vid.addEventListener("error", function(e){tid.innerHTML = vid.error.code +
+    vid.src;
+  });
   vid.addEventListener("ended", function(){
     clearInterval(watchTimer);
     vid.style.display = "none";
