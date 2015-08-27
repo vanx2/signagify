@@ -5,7 +5,7 @@ var Client   = require('castv2-client').Client;
 var CustomReciever = require('./lib/signageReciver.js');
 
 detector.on('detect', function (cast){
-  if ( cast.name.substr(0,8) != 'vanx' ){ return; }
+  if ( cast.name.substr(0,4) != 'vanx' ){ return; }
   var client = new Client();
   client.on('error', function(err){console.log(err);});
   client.connect(cast.ip, watch);
@@ -16,6 +16,7 @@ console.log(status);
         if (status.applications[0].appId != '0F5096E8' && 
             status.applications[0].appId != '5D393044' ){
           client.launch(CustomReciever, function(err, player) {
+console.log(err);
             player.on('status', function(status) {
               console.log('status broadcast playerState=%s', status.playerState);
               player.getStatus(function(err, status){
