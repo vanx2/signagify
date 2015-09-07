@@ -2,7 +2,7 @@
 
 var detector = require('./lib/chromecastDetector.js');
 var Client   = require('castv2-client').Client;
-var CustomReciever = require('./lib/signageReciver.js');
+var CustomReciever = require('./lib/dev.js');
 
 detector.on('detect', function (cast){
   if ( cast.name.substr(0,4) != 'vanx' ){ return; }

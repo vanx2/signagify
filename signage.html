@@ -16,20 +16,8 @@
   </head>
   <body>
 <script type="text/javascript">
-/*
-  window.onload = function() {
-    var dummy = document.createElement("video");
-    cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
-    window.mediaElement = dummy;
-    window.mediaManager = new cast.receiver.MediaManager(window.mediaElement);
-    window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
-    castReceiverManager.onSenderDisconnected = function (event) {
-      console.log("sender disconnected");
-    };
-    castReceiverManager.start();
-  };
-*/
   var host = 'http://192.168.1.171';
+  var mediaURL = host + '/img/';
   function sendReq(){
     var jsonp = document.createElement('script');
     jsonp.src = host + ':9000/?callback=getList';
@@ -38,18 +26,50 @@
     document.head.removeChild(jsonp);
   }
   var mqe;
+  var mediaContainer = {};
   var mediaQueue = [];
   function getList(files){
+    for (item in mediaContainer){
+      if ( files.indexOf(item) == -1) {
+        delete mediaContainer[item];
+      }
+    }
     var texts = [];
-    var excludeTexts = [];
     files.forEach(function (file) {
       if (file.split(/\./).pop() == 'txt'){
         texts.push( file.substr(0, file.length - 4) );
-      } else {
-        excludeTexts.push(file);
+      } else if (/\.(png|gif|jpe?g)$/.test(file)){
+        if (! mediaContainer.hasOwnProperty(file)){
+          var imgE = document.createElement('div');
+          imgE.style.backgroundImage = 'url(' + mediaURL + file + ')';
+          imgE.className = 'img';
+          imgE.id = file;
+          mediaContainer[file] = imgE;
+        }
+        mediaQueue.push(file);
+      } else if (/\.mp4$/.test(file)) {
+        if (! mediaContainer.hasOwnProperty(file)){
+          var vidE = document.createElement('video');
+          vidE.src = mediaURL + file;
+          vidE.load();
+          vidE.className = 'vid';
+          vidE.id = file;
+          vidE.addEventListener("error", function(e){
+            clearInterval(watchTimer);
+            watchTimer = null;
+            mediaWorker();
+          });
+          vidE.addEventListener("ended", function(){
+            clearInterval(watchTimer);
+            watchTimer = null;
+            mediaWorker();
+          });
+          mediaContainer[file] = vidE;
+        }
+        mediaQueue.push(file);
       }
     });
-    var str = texts.join('               ');
+    var str = texts.join(Array(30).join('&nbsp;'));
     if ( mqe && mqe.innerText != str ) {
       document.body.removeChild(mqe);
       delete mqe;
@@ -58,67 +78,36 @@
       mqe = document.createElement('marquee');
       mqe.innerHTML = str;
       mqe.className = 'mqe';
-      mqe.scrollamount = 20;
+      mqe.scrollAmount = 30;
+      mqe.scrolldelay = 10;
       document.body.appendChild(mqe);
     }
-    mediaQueue = excludeTexts;
-    mediaWorker();
+    if(! before) {
+      mediaWorker();
+    }
   }
-  var next, before, term;
+  var next, before;
   var watchTimer;
   function mediaWorker(){
-    if (next){
-      if (before) {
-        document.body.replaceChild(next, before);
-      } else {
-        document.body.insertBefore(next, document.body.firstChild);
-      }
-      if (next.nodeName == 'VIDEO'){
-        next.play();
-        currentTime = next.currentTime;
-        watchTimer = setInterval(watchDog, 10*1000);
-      } else if (next.className == 'img') {
-        setTimeout(mediaWorker, term * 1000);
-      }
-      before = next;
-      next = null;
-    }
-// todo: clear dom
-    if (mediaQueue.length > 0) {
-      var media = mediaQueue.shift();
-console.log(media);
-      if (/\.(png|gif|jpe?g)$/.test(media)){
-        next = document.createElement('div');
-        next.style.backgroundImage = 'url(' + host + '/img/' + media + ')';
-        next.className = 'img';
-        var arr = media.split(/\./);
-        if ( (arr[arr.length - 2]).match(/^[0-9]+$/) ) {
-          term = 0 + arr[media.arr.length - 2];
-        } else {
-          term = 3;
-        }
-      } else if (/\.mp4$/.test(media)) {
-        next = document.createElement('video');
-        next.src = host + '/img/' + media;
-        next.load();
-        next.className = 'vid';
-        next.addEventListener("error", function(e){
-          clearInterval(watchTimer);
-          watchTimer = null;
-          mediaWorker();
-        });
-        next.addEventListener("ended", function(){
-console.log(watchTimer, 'clear2');
-          clearInterval(watchTimer);
-          watchTimer = null;
-          mediaWorker();
-        });
-      }
-      if (! before){
-        mediaWorker();
-      }
+    next = mediaContainer[mediaQueue.shift()];
+    if (before) {
+      document.body.replaceChild(next, before);
     } else {
-     sendReq();
+      document.body.insertBefore(next, document.body.firstChild);
+    }
+    if (next.nodeName == 'VIDEO'){
+      next.play();
+      currentTime = next.currentTime;
+      watchTimer = setInterval(watchDog, 20*1000);
+    } else if (next.className == 'img') {
+      var arr = next.id.split(/\./);
+      setTimeout(mediaWorker, ( ( (arr[arr.length - 2]).match(/^[0-9]+$/) ) ?
+                               ( 0 + arr[arr.length - 2] ) : 10 ) * 1000);
+    }
+    before = next;
+    next = null;
+    if (mediaQueue.length == 0){
+      sendReq();
     }
   }
   var currentTime;
