@@ -30,6 +30,7 @@ http.createServer(function (req, res) {
     });
   }
   getFiles( mediaPath.replace(RegExp(path.sep + '$'), '') );
+console.log(fileList);
   res.writeHead(200, {'Content-Type':'application/json; charset=utf-8'});
   res.end(cb ? cb + "(" + JSON.stringify(fileList) + ")"
                    : JSON.stringify(fileList));
