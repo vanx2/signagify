@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var URL  = require('url');
 var mediaPath = '/Library/WebServer/Documents/img';
-var mediaPath = 'Z:\\投稿受付';
+//var mediaPath = 'Z:\\投稿受付';
 var mediaPath = 'C:\\Users\\dig_signage\\Desktop\\Contents\\img';
 
 http.createServer(function (req, res) {
