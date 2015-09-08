@@ -24,7 +24,7 @@ http.createServer(function (req, res) {
         getFiles(target);
       } else if (fs.statSync(target).isFile() &&
                  /^\.(txt|mp4|png|gif|jpe?g)$/.test(path.extname(target))) {
-        fileList.push( target.replace(mediaPath, "").split(path.sep).join('/') );
+        fileList.push( target.replace(mediaPath + path.sep, "").split(path.sep).join('/') );
       }
     });
   }
