@@ -5,6 +5,7 @@ var path = require('path');
 var URL  = require('url');
 var mediaPath = '/Library/WebServer/Documents/img';
 var mediaPath = 'Z:\\投稿受付';
+var mediaPath = 'C:\\Users\\dig_signage\\Desktop\\Contents\\img';
 
 http.createServer(function (req, res) {
   var query = URL.parse(req.url, true).query;
@@ -30,7 +31,6 @@ http.createServer(function (req, res) {
     });
   }
   getFiles( mediaPath.replace(RegExp(path.sep + '$'), '') );
-console.log(fileList);
   res.writeHead(200, {'Content-Type':'application/json; charset=utf-8'});
   res.end(cb ? cb + "(" + JSON.stringify(fileList) + ")"
                    : JSON.stringify(fileList));
