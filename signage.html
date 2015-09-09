@@ -39,7 +39,7 @@
     files.forEach(function (file) {
       if (file.split(/\./).pop() == 'txt'){
         texts.push( file.substr(0, file.length - 4) );
-      } else if (/\.(png|gif|jpe?g)$/.test(file)){
+      } else if (/\.(png|gif|jpe?g)$/i.test(file)){
         if (! mediaContainer.hasOwnProperty(file)){
           var imgE = document.createElement('div');
           imgE.style.backgroundImage = 'url(' + mediaURL + file + ')';

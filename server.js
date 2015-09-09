@@ -25,7 +25,7 @@ http.createServer(function (req, res) {
       if (fs.statSync(target).isDirectory()){
         getFiles(target);
       } else if (fs.statSync(target).isFile() &&
-                 /^\.(txt|mp4|png|gif|jpe?g)$/.test(path.extname(target))) {
+                 /^\.(txt|mp4|png|gif|jpe?g)$/i.test(path.extname(target))) {
         fileList.push( target.replace(mediaPath + path.sep, "").split(path.sep).join('/') );
       }
     });
