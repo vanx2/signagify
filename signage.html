@@ -17,6 +17,19 @@
   </head>
   <body>
 <script type="text/javascript">
+
+  var v = document.getElementById('vid');
+  window.onload = function() {
+    cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
+    window.mediaElement = v;
+    window.mediaManager = new cast.receiver.MediaManager(window.mediaElement);
+    window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+    castReceiverManager.onSenderDisconnected = function (event) {
+      console.log("sender disconnected");
+    };
+    castReceiverManager.start();
+  };
+
   var host = 'http://192.168.1.171';
   var mediaURL = host + '/img/';
   function sendReq(){
