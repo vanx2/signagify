@@ -1,0 +1,15 @@
+{
+    "isDev": true,
+    "fileList": {
+        "port": "8080",
+        "ip":   "127.0.0.1",
+        "host": "localhost",
+        "mediaPath": "/Users/van/Documents/work/signagify/pub"
+    },
+    "ssl": {
+        "key":  "/Users/van/Documents/work/signagify/ssl/server.key",
+        "cert": "/Users/van/Documents/work/signagify/ssl/server.crt",
+        "ca":   "/Users/van/Documents/work/signagify/ssl/server.csr"
+    }
+}
+

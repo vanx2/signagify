@@ -1,70 +1,59 @@
 #!/bin/env node
-var detector = require('chromecast-detector');
-var Client   = require('castv2-client').Client;
-var CustomReciever = require('castv2-client').DefaultMediaReceiver;
-CustomReciever.APP_ID = 'A5ABC4FF'; // my custome receiver
+var config = require('config');
+var https = require('https');
+var fs = require('fs');
+var path = require('path');
+var URL  = require('url');
+var finalhandler = require('finalhandler')
+var serveStatic = require('serve-static')
 
-detector.on('detect', function (cast){
-console.log(cast);
-  if ( cast.name.substr(0,4) != 'vdev' ){ return; }
+var mediaPath = '/Library/WebServer/Documents/img';
+//var mediaPath = 'Z:\\投稿受付';
+var mediaPath = 'C:\\Users\\dig_signage\\Desktop\\Contents\\img';
+var mediaPath = '/Users/van/Documents/work/signagify/pub';
+var mediaPath = '/var/apps/signagify/pub';
 
-  var client = new Client();
-  client.on('error', function(err){console.log(err);});
-  client.on('status', function (status){console.log(status);});
-  client.connect(cast.ip, firstContact);
-  function firstContact(){
-    client.getStatus(function (err, status){
-      if ( err ) {  remove(err); return; }
-      if (status && status.hasOwnProperty('applications')){
-        if (status.applications[0].appId === 'E8C28D3C'){
-          launch();
-        } else if (status.applications[0].appId == CustomReciever.APP_ID ) {
-          true;
-        } else {
-          if (status.applications[0].appId == '0F5096E8'){
-            console.log('  [GUEST USE]', new Date().toLog(), cast.name, status);
-          } else {
-            console.log('  [IGNORE APP]', new Date().toLog(), cast.name, status);
-          }
-        }
-      }
-    });
-  }
-
-  function launch() {
-    client.launch(CustomReciever, function(err, player) {
-      if(err){ remove(err); } else {
-        client.player = player;
-        client.player.on('status', function(status) {
-          console.log('  [PLAYER STATUS]', new Date().toLog(), cast.name,
-            (status.hasOwnProperty('playerState')) ? status.playerState : status) ;
-        });
-        client.player.load({contentId: 'http://192.168.1.171/x.mp4'}, { autoplay: true },
-          function(err, status) {
-            if(err){ remove(err); } else {
-              client.timer = setTimeout(monitor,5*1000);
-            }
-          }
-        );
-      }
-    });
-  }
-
-  function remove(err) {
-    console.log('[ERROR]', new Date().toLog(), cast.name, err);
-    if(client.timer){clearTimeout(client.timer);}
-    if(client.receiver){ client.close();}
-    delete client;
-    delete detector.casts[cast.id];
-    console.log(detector.casts);
-    detector.sendQuery();
-  }
-});
-
-
-Date.prototype.toLog = function() {
-  return this.toISOString().split('T')[0] + ' ' +  this.toLocaleTimeString();
+var options = {
+  key:    fs.readFileSync(config.ssl.key),
+  cert:   fs.readFileSync(config.ssl.cert)
 };
 
-detector.listen();
+if(config.ssl.ca){options.ca = fs.readFileSync(config.ssl.ca);}
+var serve = serveStatic(config.fileList.mediaPath);
+
+https.createServer(options, function (req, res) {
+  if (req.url === "/") {
+    var query = URL.parse(req.url, true).query;
+  
+    var cb = (query.hasOwnProperty('callback')) ? query.callback : null;
+    var fileList = [];
+    function getFiles( dir ) {
+      fs.readdirSync( dir
+/*
+      ).sort(
+      function(a, b){
+        return fs.statSync( path.join(dir, a) ).mtime.getTime() -
+               fs.statSync( path.join(dir, b) ).mtime.getTime();
+      }
+*/
+      ).forEach(function (file) {
+        var target = path.join(dir, file);
+        if (fs.statSync(target).isDirectory()){
+          getFiles(target);
+        } else if (fs.statSync(target).isFile() &&
+                   /^\.(txt|mp4|png|gif|jpe?g)$/i.test(path.extname(target))) {
+          fileList.push(
+            target.replace(config.fileList.mediaPath + path.sep, "").split(path.sep).join('/') );
+        }
+      });
+    }
+    getFiles( config.fileList.mediaPath.replace(RegExp(path.sep + '$'), '') );
+    res.writeHead(200, {'Content-Type':'application/json; charset=utf-8'});
+    res.end(cb ? cb + "(" + JSON.stringify(fileList) + ")"
+                     : JSON.stringify(fileList));
+  } else {
+    var done = finalhandler(req, res);
+    serve(req, res, done);
+  }
+}).listen(config.fileList.port);
 

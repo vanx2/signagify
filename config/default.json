@@ -1,0 +1,14 @@
+{
+    "isDev": false,
+    "fileList": {
+        "port": "8080",
+        "ip":   "127.0.0.1",
+        "host": "localhost",
+        "mediaPath": "/var/apps/singagify/pub"
+    },
+    "ssl": {
+        "key":  "/etc/letsencrypt/live/syno.in/privkey.pem",
+        "cert": "/etc/letsencrypt/live/syno.in/cert.pem"
+    }
+}
+
