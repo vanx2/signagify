@@ -22,6 +22,7 @@ if(config.ssl.ca){options.ca = fs.readFileSync(config.ssl.ca);}
 var serve = serveStatic(config.fileList.mediaPath);
 
 https.createServer(options, function (req, res) {
+console.log (req.url);
   if (req.url === "/") {
     var query = URL.parse(req.url, true).query;
   

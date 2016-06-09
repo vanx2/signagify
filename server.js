@@ -17,7 +17,7 @@ console.log(cast);
       if ( err ) {  remove(err); return; }
       if (status && status.hasOwnProperty('applications')){
         if (status.applications[0].appId === 'E8C28D3C'){
-          client.launchCustomReciever, function(err, player) {
+          client.launch(CustomReciever, function(err, player) {
             if(err){ remove(err); } else {
               true;
             }

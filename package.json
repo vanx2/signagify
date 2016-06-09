@@ -1,0 +1,28 @@
+{
+  "name": "signagify",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "castv2-client": "^1.1.1",
+    "chromecast-detector": "^1.0.1",
+    "config": "^1.21.0",
+    "finalhandler": "^0.4.1",
+    "serve-static": "^1.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vanx2/signagify.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vanx2/signagify/issues"
+  },
+  "homepage": "https://github.com/vanx2/signagify#readme"
+}
