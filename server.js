@@ -28,6 +28,11 @@ console.log(cast);
           if (status.applications[0].appId == '0F5096E8'){
             console.log('  [GUEST USE]', new Date().toLog(), cast.name, status);
           } else {
+           client.launch(CustomReciever, function(err, player) {
+            if(err){ remove(err); } else {
+              true;
+            }
+          });
             console.log('  [IGNORE APP]', new Date().toLog(), cast.name, status);
           }
         }
