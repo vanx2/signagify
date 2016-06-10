@@ -16,9 +16,10 @@
     <title>SIGNAGE</title>
   </head>
   <body>
+<video id=v class="base vid hide"></video>
 <script type="text/javascript">
-/*
-  var v = document.getElementById('vid');
+
+  var v = document.getElementById('v');
   window.onload = function() {
     cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
     window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
@@ -27,7 +28,8 @@
     };
     castReceiverManager.start();
   };
-*/
+    v.addEventListener("error", videoEnded);
+    v.addEventListener("ended", videoEnded);
 
   var host = 'http://192.168.1.171';
   var host = 'https://syno.in';
@@ -44,7 +46,8 @@
   function getList(files, text){
     if (files) {
       addQueue(files);
-      if (! document.getElementById('playing')) {
+      if (! window.gogogo) {
+        window.gogogo = 1
         showNext();
       }
     } else {
@@ -67,18 +70,16 @@
     }
   }
   function prepareVideo(url) {
-    var vidE = document.createElement('video');
-    vidE.src = url;
-    vidE.className = 'base vid hide';
-    vidE.id = "prepare";
-    vidE.addEventListener("error", videoEnded);
-    vidE.addEventListener("ended", videoEnded);
-    document.body.insertBefore(vidE, document.body.firstChild);
-    vidE.load();
-    return vidE;
+//    var vidE = document.createElement('video');
+//    var vidE = document.getElementById('v');
+    v.src = url;
+//    vidE.className = 'base vid hide';
+//    vidE.id = "prepare";
+//    document.body.insertBefore(vidE, document.body.firstChild);
+    v.load();
+    return v;
   }
   function playVideo(v) {
-    v.id = "playing"
     v.style.visibility = 'visible';
     v.play();
     window.videoCurrentTime = v.currentTime;
@@ -93,7 +94,7 @@
       delete window.videoWatchTimer;
 //      ev.target.video.currentTime = 0;
       ev.target.visibility = 'hidden';
-      document.body.removeChild(ev.target);
+  //    document.body.removeChild(ev.target);
       showNext();
     }
   }
@@ -101,13 +102,11 @@
     var imgE = document.createElement('div');
     imgE.style.backgroundImage = 'url(' + url + ')';
     imgE.className = 'base img hide';
-    imgE.id = "prepare";
     document.body.insertBefore(imgE, document.body.firstChild);
     return imgE;
   }
   function showImage(img, sec) {
     img.style.visibility = 'visible';
-    img.id = "playing";
     setTimeout(imageEnded, sec * 1000, img );
   }
   function imageEnded(img) {
