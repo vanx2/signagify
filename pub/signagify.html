@@ -17,7 +17,7 @@
   </head>
   <body>
 <script type="text/javascript">
-
+/*
   var v = document.getElementById('vid');
   window.onload = function() {
     cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
@@ -27,6 +27,7 @@
     };
     castReceiverManager.start();
   };
+*/
 
   var host = 'http://192.168.1.171';
   var host = 'https://syno.in';
@@ -39,95 +40,110 @@
     document.head.removeChild(jsonp);
   }
   var mqe;
-  var mediaContainer = {};
-  var mediaQueue = [];
-  function getList(files){
-    for (item in mediaContainer){
-      if ( files.indexOf(item) == -1) {
-        delete mediaContainer[item];
+  window.mediaQueue = [];
+  function getList(files, text){
+    if (files) {
+      addQueue(files);
+      if (! document.getElementById('playing')) {
+        showNext();
       }
+    } else {
+      setTimeout(sendReq, 10 * 1000);
     }
-    var texts = [];
-    files.forEach(function (file) {
-      if (file.split(/\./).pop() == 'txt'){
-        texts.push( file.substr(0, file.length - 4) );
-      } else if (/\.(png|gif|jpe?g)$/i.test(file)){
-        if (! mediaContainer.hasOwnProperty(file)){
-          var imgE = document.createElement('div');
-          imgE.style.backgroundImage = 'url(' + mediaURL + file + ')';
-          imgE.className = 'base img hide';
-          imgE.id = file;
-          mediaContainer[file] = imgE;
-          document.body.insertBefore(imgE, document.body.firstChild);
-        }
-        mediaQueue.push(file);
-      } else if (/\.mp4$/.test(file)) {
-        if (! mediaContainer.hasOwnProperty(file)){
-          var vidE = document.createElement('video');
-          vidE.src = mediaURL + file;
-          vidE.load();
-          vidE.className = 'base vid hide';
-          vidE.id = file;
-          function vClear(ev){
-            if(ev.type != 'ended') {console.log(playing.error);}
-            clearInterval(watchTimer);
-            watchTimer = null;
-            mediaWorker();
-          }
-          vidE.addEventListener("error", vClear);
-          vidE.addEventListener("ended", vClear);
-          mediaContainer[file] = vidE;
-          document.body.insertBefore(vidE, document.body.firstChild);
-        }
-        mediaQueue.push(file);
-      }
-    });
-    var str = texts.join(Array(30).join('&nbsp;'));
-    if ( mqe && mqe.innerText != str ) {
-      document.body.removeChild(mqe);
-      delete mqe;
-    }
-    if ( str && ( (!mqe) || ( mqe.innerText != str ) ) ) {
-      mqe = document.createElement('marquee');
-      mqe.innerHTML = str;
-      mqe.className = 'mqe';
-      mqe.scrollAmount = 30;
-      mqe.scrolldelay = 10;
-      document.body.appendChild(mqe);
-    }
-    if (! playing) { mediaWorker(); }
+    marqqueeManager(text);
   }
-  var watchTimer;
-  var playing;
-  function mediaWorker(){
-    if (playing) { playing.style.visibility = 'hidden'; }
-    playing = document.getElementById(mediaQueue.shift());
-    if (playing) {
-      playing.style.visibility = 'visible';
-      if (playing && playing.nodeName == 'VIDEO'){
-        playing.play();
-        currentTime = playing.currentTime;
-        watchTimer = setInterval(watchDog, 20*1000);
-      } else if (playing && playing.nodeName == 'DIV') {
-        var arr = playing.id.split(/\./);
-        setTimeout(mediaWorker, ( ( (arr[arr.length - 2]).match(/^[0-9]+$/) ) ?
-                                 ( 0 + arr[arr.length - 2] ) : 10 ) * 1000);
-      }
+  function addQueue(obj) {
+    Array.prototype.push.apply(window.mediaQueue, obj);
+  }
+  function showNext() {
+    var next = window.mediaQueue.shift();
+    if (next.type == "IMAGE") {
+      showImage(prepareImage(next.url), next.sec);
+    } else if (next.type == "VIDEO") {
+      playVideo(prepareVideo(next.url));
     }
-    if (mediaQueue.length == 0){
+    if (window.mediaQueue.length < 1) {
       sendReq();
     }
   }
-  var currentTime;
-  function watchDog(v){
-console.log('watch', currentTime, playing.currentTime);
-    if ( currentTime == playing.currentTime) {
-      console.log('mmm... ');
-      playing.load();
-      playing.play();
-    }
-    currentTime = playing.currentTime;
+  function prepareVideo(url) {
+    var vidE = document.createElement('video');
+    vidE.src = url;
+    vidE.className = 'base vid hide';
+    vidE.id = "prepare";
+    vidE.addEventListener("error", videoEnded);
+    vidE.addEventListener("ended", videoEnded);
+    document.body.insertBefore(vidE, document.body.firstChild);
+    vidE.load();
+    return vidE;
   }
+  function playVideo(v) {
+    v.id = "playing"
+    v.style.visibility = 'visible';
+    v.play();
+    window.videoCurrentTime = v.currentTime;
+    window.videoWatchTimer = setInterval(videoWatchDog, 10*1000, v);
+  }
+  function videoEnded(ev) {
+    if (ev.type != 'ended') {
+      console.log(ev.target.error);
+      onError();
+    } else {
+      clearInterval(window.videoWatchTimer);
+      delete window.videoWatchTimer;
+//      ev.target.video.currentTime = 0;
+      ev.target.visibility = 'hidden';
+      document.body.removeChild(ev.target);
+      showNext();
+    }
+  }
+  function prepareImage(url) {
+    var imgE = document.createElement('div');
+    imgE.style.backgroundImage = 'url(' + url + ')';
+    imgE.className = 'base img hide';
+    imgE.id = "prepare";
+    document.body.insertBefore(imgE, document.body.firstChild);
+    return imgE;
+  }
+  function showImage(img, sec) {
+    img.style.visibility = 'visible';
+    img.id = "playing";
+    setTimeout(imageEnded, sec * 1000, img );
+  }
+  function imageEnded(img) {
+    img.style.visibility = 'hidden';
+    document.body.removeChild(img);
+    showNext();
+  }
+  function videoWatchDog(v){
+    if ( window.videoCurrentTime == v.currentTime ) {
+      console.log('mmm... looks stopping');
+      onError();
+    } else {
+      window.videoCurrentTime = v.currentTime;
+    }
+  }
+  function marqqueeManager(texts) {
+    var mqe = document.getElementById('marqueeText');
+    if (texts) {
+      if (! mqe) {
+        mqe = document.createElement('div');
+        mqe.id = 'marqueeText'
+        mqe.className = 'mqe';
+      }
+      var text = texts.join("　".repeat(10));
+      if (mqe.innerText != text ) {
+        mqe.innerHTML = text;
+      }
+    } else if (mqe) {
+      document.body.removeChild(mqe);
+    }
+  }
+  function onError() {
+    customMessageBus.broadcast('restart me');
+//    window.close();
+  }
+
   sendReq();
 </script>
   </body>
