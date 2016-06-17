@@ -2,13 +2,17 @@
 <html>
   <head>
 <style type="text/css">
-  body { background-color: black; margin: 0px; border: 0px; overflow: hidden }
+  body { background-color: black; margin: 0px; border: 0px; overflow: hidden; width: 100% }
     .base{ position: fixed; width: 100%; height: 100% }
     .vid { ; }
     .img { background-size: contain; background-repeat: no-repeat; background-position: center }
     .hide{ visibility : hidden }
-    .mqe { position: fixed; color: white; font-size: 120px;
-           text-shadow: 5px 5px 1px #999999; -webkit-text-stroke: 1px #000; }
+    .mqe { position: absolute; top: 0px; left: 0px; display: inline-block; padding-left: 100%;
+       white-space: nowrap; margin: 0px; border: 0px;
+      -webkit-animation-name: mqe;   -webkit-animation-timing-function: linear;
+      -webkit-animation-duration: 10s; -webkit-animation-iteration-count: infinite;
+      color: white; font-size: 120px; text-shadow: 5px 5px 1px gray; -webkit-text-stroke: 1px black; }
+    @keyframes mqe{ 0% { transform: translateX(0);} 100% { transform: translateX(-100%);} }
 </style>
 <script type="text/javascript"
     src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js">
@@ -51,7 +55,7 @@
         showNext();
       }
     } else {
-      setTimeout(sendReq, 10 * 1000);
+      setTimeout(sendReq, 3 * 1000);
     }
     marqqueeManager(text);
   }
@@ -61,18 +65,24 @@
   function showNext() {
     var next = window.mediaQueue.shift();
     if (next.type == "IMAGE") {
-      showImage(prepareImage(next.url), next.sec);
+      var pre = document.getElementById('prepare');
+      if (! pre){
+        pre = prepareImage(next.url);
+      }
+      showImage(pre, next.sec);
     } else if (next.type == "VIDEO") {
       playVideo(prepareVideo(next.url));
     }
     if (window.mediaQueue.length < 1) {
       sendReq();
+    } else if (window.mediaQueue[0].type == "IMAGE") {
+      prepareImage(window.mediaQueue[0].url);
     }
   }
   function prepareVideo(url) {
 //    var vidE = document.createElement('video');
 //    var vidE = document.getElementById('v');
-    v.src = url;
+    v.src = mediaURL + url;
 //    vidE.className = 'base vid hide';
 //    vidE.id = "prepare";
 //    document.body.insertBefore(vidE, document.body.firstChild);
@@ -80,7 +90,7 @@
     return v;
   }
   function playVideo(v) {
-    v.style.visibility = 'visible';
+    v.classList.remove('hide');
     v.play();
     window.videoCurrentTime = v.currentTime;
     window.videoWatchTimer = setInterval(videoWatchDog, 10*1000, v);
@@ -92,25 +102,24 @@
     } else {
       clearInterval(window.videoWatchTimer);
       delete window.videoWatchTimer;
-//      ev.target.video.currentTime = 0;
-      ev.target.visibility = 'hidden';
-  //    document.body.removeChild(ev.target);
+      ev.target.classList.add ('hide');
       showNext();
     }
   }
   function prepareImage(url) {
     var imgE = document.createElement('div');
-    imgE.style.backgroundImage = 'url(' + url + ')';
+    imgE.id = 'prepare';
+    imgE.style.backgroundImage = 'url(' + mediaURL + url + ')';
     imgE.className = 'base img hide';
     document.body.insertBefore(imgE, document.body.firstChild);
     return imgE;
   }
   function showImage(img, sec) {
-    img.style.visibility = 'visible';
+    img.classList.remove('hide');
+    img.id ='show';
     setTimeout(imageEnded, sec * 1000, img );
   }
   function imageEnded(img) {
-    img.style.visibility = 'hidden';
     document.body.removeChild(img);
     showNext();
   }
@@ -126,20 +135,26 @@
     var mqe = document.getElementById('marqueeText');
     if (texts) {
       if (! mqe) {
-        mqe = document.createElement('div');
+        mqe = document.createElement('span');
         mqe.id = 'marqueeText'
         mqe.className = 'mqe';
+        document.body.appendChild(mqe);
       }
       var text = texts.join("　".repeat(10));
       if (mqe.innerText != text ) {
         mqe.innerHTML = text;
       }
+      var t = text.length;
+      var s = (text.match( /[\x20-\x7E]/g ) || [] ).length;
+      var wc = ( t - s ) * 2 + s ;
+      mqe.style.webkitAnimationDuration = ( Math.floor( wc * ( 0.75 / 2) ) + 10 ) + "s";
     } else if (mqe) {
       document.body.removeChild(mqe);
     }
   }
   function onError() {
     customMessageBus.broadcast('restart me');
+// todo: reload or finish app
 //    window.close();
   }
 
