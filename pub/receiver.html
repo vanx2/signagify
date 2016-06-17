@@ -17,6 +17,7 @@
 <script type="text/javascript">
   window.onload = function() {
     cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
+    console.log('Starting media application');
     window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
     castReceiverManager.onSenderDisconnected = function (event) {
       console.log("sender disconnected");
@@ -132,5 +133,3 @@
 </script>
   </body>
 </html>
-
-
