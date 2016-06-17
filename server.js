@@ -5,7 +5,6 @@ var CustomReciever = require('castv2-client').DefaultMediaReceiver;
 CustomReciever.APP_ID = '5D393044'; // my custome receiver
 
 detector.on('detect', function (cast){
-console.log(cast);
   if ( cast.name.substr(0,4) != 'vdev' ){ return; }
 
   var client = new Client();
@@ -23,6 +22,11 @@ console.log(cast);
             }
           });
         } else if (status.applications[0].appId == CustomReciever.APP_ID ) {
+            client.launch(CustomReciever, function(err, player) {
+              if(err){ remove(err); } else {
+                true;
+              }
+            });
           true;
         } else {
           if (status.applications[0].appId == '0F5096E8'){
