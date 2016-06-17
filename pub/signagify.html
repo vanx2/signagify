@@ -24,19 +24,22 @@
 <script type="text/javascript">
 
   var v = document.getElementById('v');
+    v.addEventListener("error", videoEnded);
+    v.addEventListener("ended", videoEnded);
+
   window.onload = function() {
     cast.receiver.logger.setLevelValue(cast.receiver.LoggerLevel.DEBUG);
+    window.mediaElement = v;
+    window.mediaManager = new cast.receiver.MediaManager(window.mediaElement);
     window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
     castReceiverManager.onSenderDisconnected = function (event) {
       console.log("sender disconnected");
     };
     castReceiverManager.start();
   };
-    v.addEventListener("error", videoEnded);
-    v.addEventListener("ended", videoEnded);
 
-  var host = 'http://192.168.1.171';
   var host = 'https://syno.in';
+  var host = 'http://192.168.1.171';
   var mediaURL = host + ':9000/';
   function sendReq(){
     var jsonp = document.createElement('script');

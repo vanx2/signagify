@@ -2,11 +2,12 @@
 var detector = require('chromecast-detector');
 var Client   = require('castv2-client').Client;
 var CustomReciever = require('castv2-client').DefaultMediaReceiver;
+CustomReciever.APP_ID = 'CA38BAF1'; // my custome receiver
 CustomReciever.APP_ID = '5D393044'; // my custome receiver
 
 detector.on('detect', function (cast){
-  if ( cast.name.substr(0,4) != 'vdev' ){ return; }
-
+  if ( cast.name.substr(0,4) != 'vnew' ){ return; }
+console.log(cast.name);
   var client = new Client();
   client.on('error', function(err){console.log(err);});
   client.on('status', function (status){console.log(status);});
@@ -22,6 +23,7 @@ detector.on('detect', function (cast){
             }
           });
         } else if (status.applications[0].appId == CustomReciever.APP_ID ) {
+console.log("already running");
             client.launch(CustomReciever, function(err, player) {
               if(err){ remove(err); } else {
                 true;
