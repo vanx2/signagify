@@ -59,7 +59,7 @@ https.createServer(options, function (req, res) {
             fileList.push(
               { "type": "IMAGE",
                 "url": url,
-                "sec": ( ( isFinite(sec) )  ? ( 0 + sec ) : 10 )
+                "sec": ( ( isFinite(sec) )  ? ( 0 + sec ) : 3 )
               }
             );
           }
