@@ -2,9 +2,7 @@
     "isDev": false,
     "fileList": {
         "port": "9000",
-        "ip":   "210.252.73.53",
-        "host": "syno.in",
-        "mediaPath": "/var/apps/signagify/pub"
+        "mediaPath": "z:\\投稿受付\\"
     },
     "ssl": {
         "key":  "/etc/letsencrypt/live/syno.in/privkey.pem",

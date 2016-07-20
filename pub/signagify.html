@@ -99,21 +99,22 @@
     window.videoWatchTimer = setInterval(videoWatchDog, 10*1000, v);
   }
   function videoEnded(ev) {
-    if (ev.type != 'ended') {
-      console.log(ev.target.error);
-      onError();
-    } else {
+//    if (ev.type != 'ended') {
+//      console.log(ev.target.error);
+//      onError();
+//    } else {
       clearInterval(window.videoWatchTimer);
       delete window.videoWatchTimer;
-      ev.target.classList.add ('hide');
+      ev.target.classList.add('hide');
       showNext();
-    }
+//    }
   }
   function prepareImage(url) {
     var imgE = document.createElement('div');
     imgE.id = 'prepare';
     imgE.style.backgroundImage = 'url(' + mediaURL + url + ')';
     imgE.className = 'base img hide';
+    // TODO:onerror
     document.body.insertBefore(imgE, document.body.firstChild);
     return imgE;
   }
