@@ -15,8 +15,8 @@ var options = {
   cert:   fs.readFileSync(config.ssl.cert)
 };
 if(config.ssl.ca){options.ca = fs.readFileSync(config.ssl.ca);}
-var serve = serveStatic(config.fileList.mediaPath);
 */
+var serve = serveStatic(mediaPath);
 
 http.createServer(function (req, res) {
 console.log(req.url);
