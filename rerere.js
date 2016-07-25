@@ -17,7 +17,7 @@ var savePath = "z:\\配信済み";
         var fstat = fs.statSync(target);
         if ( ( (fstat.isFile() && /^\.(txt|mp4|mpeg|png|gif|jpe?g)$/i.test(path.extname(target)) ) ||
                 fstat.isDirectory() ) &&
-                new Date(fstat.ctime) > new Date().setDate( today.getDate() - 7 )   ){
+                new Date(fstat.ctime) > new Date().setDate( new Date().getDate() - 7 )   ){
           console.log(file + ' : ' + fstat.ctime);
           fs.renameSync(target, path.join(savePath, file) );
         }

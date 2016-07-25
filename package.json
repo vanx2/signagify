@@ -8,6 +8,8 @@
     "chromecast-detector": "^1.0.1",
     "config": "^1.21.0",
     "finalhandler": "^0.4.1",
+    "iconv": "^2.2.1",
+    "jschardet": "^1.4.1",
     "serve-static": "^1.11.0"
   },
   "devDependencies": {},
